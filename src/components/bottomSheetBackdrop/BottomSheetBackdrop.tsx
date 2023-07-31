@@ -5,13 +5,9 @@ import Animated, {
   Extrapolate,
   useAnimatedStyle,
   useAnimatedReaction,
-  useAnimatedGestureHandler,
   runOnJS,
 } from 'react-native-reanimated';
-import {
-  TapGestureHandler,
-  TapGestureHandlerGestureEvent,
-} from 'react-native-gesture-handler';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { useBottomSheet } from '../../hooks';
 import {
   DEFAULT_OPACITY,
@@ -74,15 +70,13 @@ const BottomSheetBackdropComponent = ({
   //#endregion
 
   //#region tap gesture
-  const gestureHandler =
-    useAnimatedGestureHandler<TapGestureHandlerGestureEvent>(
-      {
-        onFinish: () => {
-          runOnJS(handleOnPress)();
-        },
-      },
-      [handleOnPress]
-    );
+  const gesture = useMemo(
+    () =>
+      Gesture.Tap().onEnd(() => {
+        runOnJS(handleOnPress)();
+      }),
+    [handleOnPress]
+  );
   //#endregion
 
   //#region styles
@@ -115,7 +109,7 @@ const BottomSheetBackdropComponent = ({
   //#endregion
 
   return pressBehavior !== 'none' ? (
-    <TapGestureHandler onGestureEvent={gestureHandler}>
+    <GestureDetector gesture={gesture}>
       <Animated.View
         style={containerStyle}
         pointerEvents={pointerEvents}
@@ -128,7 +122,7 @@ const BottomSheetBackdropComponent = ({
       >
         {children}
       </Animated.View>
-    </TapGestureHandler>
+    </GestureDetector>
   ) : (
     <Animated.View pointerEvents={pointerEvents} style={containerStyle}>
       {children}
